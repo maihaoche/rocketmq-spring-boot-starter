@@ -44,6 +44,27 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
         }
         AbstractMQProducer abstractMQProducer = (AbstractMQProducer) bean;
         abstractMQProducer.setProducer(producer);
+        // begin build producer level topic
+        MQProducer mqProducer = applicationContext.findAnnotationOnBean(beanName, MQProducer.class);
+        String topic = mqProducer.topic();
+        if(!StringUtils.isEmpty(topic)) {
+            String transTopic = applicationContext.getEnvironment().getProperty(topic);
+            if(StringUtils.isEmpty(transTopic)) {
+                abstractMQProducer.setTopic(topic);
+            } else {
+                abstractMQProducer.setTopic(transTopic);
+            }
+        }
+        // begin build producer level tag
+        String tag = mqProducer.tag();
+        if(!StringUtils.isEmpty(tag)) {
+            String transTag = applicationContext.getEnvironment().getProperty(tag);
+            if(StringUtils.isEmpty(transTag)) {
+                abstractMQProducer.setTag(tag);
+            } else {
+                abstractMQProducer.setTag(transTag);
+            }
+        }
         log.info(String.format("%s is ready to produce message", beanName));
     }
 }

@@ -25,6 +25,21 @@ public abstract class AbstractMQProducer {
     public AbstractMQProducer() {
     }
 
+    private String tag;
+
+    /**
+     * 重写此方法,或者通过setter方法注入tag设置producer bean 级别的tag
+     *
+     * @return tag
+     */
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     @Setter
     private DefaultMQProducer producer;
 
@@ -39,13 +54,64 @@ public abstract class AbstractMQProducer {
         }
     }
 
+    private String topic;
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
     /**
      * 重写此方法定义bean级别的topic，如果有返回有效topic，可以直接使用 sendMessage() 方法发送消息
      *
      * @return
      */
     public String getTopic() {
-        return "";
+        return this.topic;
+    }
+
+    private Message genMessage(String topic, String tag, Object msgObj) {
+        String str = gson.toJson(msgObj);
+        if(StringUtils.isEmpty(topic)) {
+            if(StringUtils.isEmpty(getTopic())) {
+                throw new RuntimeException("no topic defined to send this message");
+            }
+            topic = getTopic();
+        }
+        Message message = new Message(topic, str.getBytes(Charset.forName("utf-8")));
+        if (!StringUtils.isEmpty(tag)) {
+            message.setTags(tag);
+        } else if (!StringUtils.isEmpty(getTag())) {
+            message.setTags(getTag());
+        }
+        return message;
+    }
+
+
+    /**
+     * fire and forget 不关心消息是否送达，可以提高发送tps
+     *
+     * @param topic
+     * @param tag
+     * @param msgObj
+     * @throws MQException
+     */
+    public void sendOneWay(String topic, String tag, Object msgObj) throws MQException {
+        try {
+            producer.sendOneway(genMessage(topic, tag, msgObj));
+        } catch (Exception e) {
+            log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
+            throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
+        }
+    }
+
+    /**
+     * fire and forget 不关心消息是否送达，可以提高发送tps
+     *
+     * @param msgObj
+     * @throws MQException
+     */
+    public void sendOneWay(Object msgObj) throws MQException {
+        sendOneWay("", "", msgObj);
     }
 
     /**
@@ -57,17 +123,10 @@ public abstract class AbstractMQProducer {
      */
     public void synSend(String topic, String tag, Object msgObj) throws MQException {
         try {
-            if(StringUtils.isEmpty(topic) || null == msgObj) {
+            if(null == msgObj) {
                 return;
             }
-            String str = gson.toJson(msgObj);
-            Message message;
-            if (!StringUtils.isEmpty(tag)) {
-                message = new Message(topic, tag, str.getBytes(Charset.forName("utf-8")));
-            } else {
-                message = new Message(topic, str.getBytes(Charset.forName("utf-8")));
-            }
-            SendResult sendResult = producer.send(message);
+            SendResult sendResult = producer.send(genMessage(topic, tag, msgObj));
             log.info("send rocketmq message ,messageId : {}", sendResult.getMsgId());
             this.doAfterSynSend(sendResult);
         } catch (Exception e) {
@@ -77,46 +136,43 @@ public abstract class AbstractMQProducer {
     }
 
     /**
-     * 同步发送消息，不带tag
-     *
-     * @param topic topic
-     * @param msgObj 消息体
+     * 同步发送消息
+     * @param msgObj  消息体
      * @throws MQException
      */
-    public void synSend(String topic, Object msgObj) throws MQException {
-        try {
-            if(StringUtils.isEmpty(topic) || null == msgObj) {
-                return;
-            }
-            String str = gson.toJson(msgObj);
-            SendResult sendResult = producer.send(new Message(topic, str.getBytes(Charset.forName("utf-8"))));
-            log.info("send rocketmq message ,messageId : {}", sendResult.getMsgId());
-            this.doAfterSynSend(sendResult);
-        } catch (Exception e) {
-            log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
-            throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
-        }
+    public void synSend(Object msgObj) throws MQException {
+        synSend("", "", msgObj);
     }
 
     /**
-     * 异步发送消息
+     * 异步发送消息带tag
      * @param topic topic
+     * @param tag tag
      * @param msgObj msgObj
      * @param sendCallback 回调
      * @throws MQException
      */
-    public void asynSend(String topic, Object msgObj, SendCallback sendCallback) throws MQException {
+    public void asynSend(String topic, String tag, Object msgObj, SendCallback sendCallback) throws MQException {
         try {
-            if (StringUtils.isEmpty(topic) || null == msgObj) {
+            if (null == msgObj) {
                 return;
             }
-            String str = gson.toJson(msgObj);
-            producer.send(new Message(topic, str.getBytes(Charset.forName("utf-8"))), sendCallback);
+            producer.send(genMessage(topic, tag, msgObj), sendCallback);
             log.info("send rocketmq message asyn");
         } catch (Exception e) {
             log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
             throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
         }
+    }
+
+    /**
+     * 异步发送消息不带tag和topic
+     * @param msgObj msgObj
+     * @param sendCallback 回调
+     * @throws MQException
+     */
+    public void asynSend(Object msgObj, SendCallback sendCallback) throws MQException {
+        asynSend("", "", msgObj, sendCallback);
     }
 
     /**
@@ -129,7 +185,7 @@ public abstract class AbstractMQProducer {
         if(StringUtils.isEmpty(getTopic())) {
             throw new MQException("如果用这种方式发送消息，请在实例中重写 getTopic() 方法返回需要发送的topic");
         }
-        synSend(getTopic(), msgObj);
+        sendOneWay("", "", msgObj);
     }
 
     /**
@@ -137,6 +193,5 @@ public abstract class AbstractMQProducer {
      *
      * @param sendResult  发送结果
      */
-    public void doAfterSynSend(SendResult sendResult) {
-    }
+    public void doAfterSynSend(SendResult sendResult) {}
 }

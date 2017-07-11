@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by suclogger on 2017/6/28.
@@ -32,6 +33,12 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
 
     private void publishConsumer(String beanName, Object bean) throws Exception {
         MQConsumer mqConsumer = applicationContext.findAnnotationOnBean(beanName, MQConsumer.class);
+        if(StringUtils.isEmpty(mqConsumer.consumerGroup())) {
+            throw new RuntimeException("consumer's consumerGroup must be defined");
+        }
+        if(StringUtils.isEmpty(mqConsumer.topic())) {
+            throw new RuntimeException("consumer's topic must be defined");
+        }
         String consumerGroup = applicationContext.getEnvironment().getProperty(mqConsumer.consumerGroup());
         if(StringUtils.isEmpty(consumerGroup)) {
             consumerGroup = mqConsumer.consumerGroup();
@@ -43,6 +50,7 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
         consumer.setNamesrvAddr(mqProperties.getNameServerAddress());
         consumer.subscribe(topic, mqConsumer.tag());
+        consumer.setInstanceName(UUID.randomUUID().toString());
         consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) -> {
             if(!AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())) {
                 throw new RuntimeException(bean.getClass().getName() + " - consumer未实现IMQPushConsumer接口");

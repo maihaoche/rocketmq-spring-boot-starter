@@ -12,11 +12,42 @@
     <properties>
         <java.version>1.8</java.version>
         <rocketmq.version>4.0.0-incubating</rocketmq.version>
+        <file_encoding>UTF-8</file_encoding>
     </properties>
 
+    <packaging>jar</packaging>
+    <name>spring-boot-starter-rocketmq</name>
+    <description>spring boot starter for rocketmq</description>
+    <url>https://github.com/maihaoche/rocketmq-spring-boot-starter</url>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, Version 3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>manual</distribution>
+            <comments>A free, copyleft license for software and other kinds of works</comments>
+        </license>
+    </licenses>
+
+
     <groupId>com.maihaoche</groupId>
-    <artifactId>rocketmq-spring-boot-starter</artifactId>
-    <version>0.0.1</version>
+    <artifactId>spring-boot-starter-rocketmq</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <scm>
+        <url>https://github.com/maihaoche/rocketmq-spring-boot-starter</url>
+        <connection>scm:git:git://github.com/maihaoche/rocketmq-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:git@github.com:maihaoche/rocketmq-spring-boot-starter.git</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <email>suclogger@gmail.com</email>
+            <name>suclogger</name>
+            <url>https://github.com/suclogger</url>
+            <id>suclogger</id>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
@@ -37,4 +68,62 @@
             <version>${rocketmq.version}</version>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>release-to-oss</id>
+            <build>
+                <plugins>
+                    <!-- Source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- GPG -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>

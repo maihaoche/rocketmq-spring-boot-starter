@@ -40,7 +40,7 @@ public abstract class AbstractMQPushConsumer<T> {
     public ConsumeConcurrentlyStatus dealMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         for(MessageExt messageExt : list) {
             T t = parseMessage(messageExt);
-            if(!process(t)) {
+            if( null != t && !process(t)) {
                 return ConsumeConcurrentlyStatus.RECONSUME_LATER;
             }
         }
@@ -62,7 +62,8 @@ public abstract class AbstractMQPushConsumer<T> {
             Object data = gson.fromJson(new String(message.getBody()), type);
             return (T) data;
         } else {
-            throw new RuntimeException("Parse msg error.");
+            log.warn("Parse msg error. {}", message);
+            return null;
         }
     }
 
