@@ -1,4 +1,4 @@
-package com.mhc.starter.mq.base;
+package com.maihaoche.starter.mq.base;
 
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;

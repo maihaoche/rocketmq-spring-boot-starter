@@ -1,7 +1,7 @@
-package com.mhc.starter.mq.config;
+package com.maihaoche.starter.mq.config;
 
-import com.mhc.starter.mq.annotation.MQConsumer;
-import com.mhc.starter.mq.base.AbstractMQPushConsumer;
+import com.maihaoche.starter.mq.annotation.MQConsumer;
+import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;

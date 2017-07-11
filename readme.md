@@ -1,10 +1,12 @@
 # rocketmq-spring-boot-starter
+
 spring boot starter for RocketMQ 
+
 首先添加maven依赖：
 
 ```
 		<dependency>
-			<groupId>com.mhc</groupId>
+			<groupId>com.maihaoche</groupId>
 			<artifactId>rocketmq-spring-boot-starter</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -61,3 +63,4 @@ lateinit var demoProducer:DemoProducer
 demoProducer.synSend("suclogger", "test message")
     
 ```
+

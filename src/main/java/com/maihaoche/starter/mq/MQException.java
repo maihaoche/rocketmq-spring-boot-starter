@@ -1,4 +1,4 @@
-package com.mhc.starter.mq;
+package com.maihaoche.starter.mq;
 
 /**
  * Created by yipin on 2017/6/28.

@@ -14,7 +14,7 @@
         <rocketmq.version>4.0.0-incubating</rocketmq.version>
     </properties>
 
-    <groupId>com.mhc</groupId>
+    <groupId>com.maihaoche</groupId>
     <artifactId>rocketmq-spring-boot-starter</artifactId>
     <version>0.0.1</version>
 

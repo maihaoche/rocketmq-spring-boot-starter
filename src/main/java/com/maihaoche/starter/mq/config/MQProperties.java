@@ -1,4 +1,4 @@
-package com.mhc.starter.mq.config;
+package com.maihaoche.starter.mq.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

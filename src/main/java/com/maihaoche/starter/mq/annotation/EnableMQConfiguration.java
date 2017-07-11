@@ -1,4 +1,4 @@
-package com.mhc.starter.mq.annotation;
+package com.maihaoche.starter.mq.annotation;
 
 import java.lang.annotation.*;
 

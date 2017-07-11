@@ -1,7 +1,7 @@
-package com.mhc.starter.mq.base;
+package com.maihaoche.starter.mq.base;
 
 import com.google.gson.Gson;
-import com.mhc.starter.mq.MQException;
+import com.maihaoche.starter.mq.MQException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

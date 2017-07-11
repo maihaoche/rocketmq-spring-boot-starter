@@ -1,7 +1,7 @@
-package com.mhc.starter.mq.config;
+package com.maihaoche.starter.mq.config;
 
-import com.mhc.starter.mq.annotation.MQProducer;
-import com.mhc.starter.mq.base.AbstractMQProducer;
+import com.maihaoche.starter.mq.annotation.MQProducer;
+import com.maihaoche.starter.mq.base.AbstractMQProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;

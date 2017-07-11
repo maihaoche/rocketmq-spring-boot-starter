@@ -1,8 +1,8 @@
-package com.mhc.starter.mq.config;
+package com.maihaoche.starter.mq.config;
 
-import com.mhc.starter.mq.annotation.EnableMQConfiguration;
-import com.mhc.starter.mq.base.AbstractMQProducer;
-import com.mhc.starter.mq.base.AbstractMQPushConsumer;
+import com.maihaoche.starter.mq.annotation.EnableMQConfiguration;
+import com.maihaoche.starter.mq.base.AbstractMQProducer;
+import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
