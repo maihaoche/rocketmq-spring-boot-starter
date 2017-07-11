@@ -8,6 +8,7 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -31,9 +32,17 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
 
     private void publishConsumer(String beanName, Object bean) throws Exception {
         MQConsumer mqConsumer = applicationContext.findAnnotationOnBean(beanName, MQConsumer.class);
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(mqConsumer.consumerGroup());
+        String consumerGroup = applicationContext.getEnvironment().getProperty(mqConsumer.consumerGroup());
+        if(StringUtils.isEmpty(consumerGroup)) {
+            consumerGroup = mqConsumer.consumerGroup();
+        }
+        String topic = applicationContext.getEnvironment().getProperty(mqConsumer.topic());
+        if(StringUtils.isEmpty(topic)) {
+            topic = mqConsumer.topic();
+        }
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
         consumer.setNamesrvAddr(mqProperties.getNameServerAddress());
-        consumer.subscribe(mqConsumer.topic(), mqConsumer.tag());
+        consumer.subscribe(topic, mqConsumer.tag());
         consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) -> {
             if(!AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())) {
                 throw new RuntimeException(bean.getClass().getName() + " - consumer未实现IMQPushConsumer接口");
