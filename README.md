@@ -5,11 +5,11 @@ spring boot starter for RocketMQ
 首先添加maven依赖：
 
 ```
-		<dependency>
-			<groupId>com.maihaoche</groupId>
-			<artifactId>rocketmq-spring-boot-starter</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+<dependency>
+    <groupId>com.maihaoche</groupId>
+    <artifactId>spring-boot-starter-rocketmq</artifactId>
+    <version>0.0.1</version>
+</dependency>
 ```
 
 添加配置：
