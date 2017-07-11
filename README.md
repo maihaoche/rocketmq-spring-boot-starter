@@ -29,7 +29,7 @@ class CamaroDemoApplication {
 }
 ```
 
-创建发送方：
+创建发送方(详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Provider))：
 
 ```
 @MQProducer
@@ -37,7 +37,7 @@ class DemoProducer : AbstractMQProducer() {
 }
 ```
 
-创建消费方：
+创建消费方(详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Consumer))：
 
 ```
 @MQConsumer(consumerGroup = "local_pufang_test_consumer", topic = "suclogger")
