@@ -2,6 +2,9 @@
 
 spring boot starter for RocketMQ 
 
+<p><a href="http://search.maven.org/#search%7Cga%7C1%7Corg.apache.rocketmq"><img src="https://camo.githubusercontent.com/7839f35a0d6288e8bd675a15bd8ff91f56ec163d/68747470733a2f2f6d6176656e2d6261646765732e6865726f6b756170702e636f6d2f6d6176656e2d63656e7472616c2f6f72672e6170616368652e726f636b65746d712f726f636b65746d712d616c6c2f62616467652e737667" alt="Maven Central" data-canonical-src="https://maven-badges.herokuapp.com/maven-central/com.maihaoche/spring-boot-starter-rocketmq/badge.svg" style="max-width:100%;"></a>
+<a href="https://github.com/maihaoche/rocketmq-spring-boot-starter/releases"><img src="https://camo.githubusercontent.com/795f06dcbec8d5adcfadc1eb7a8ac9c7d5007fce/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f72656c656173652d646f776e6c6f61642d6f72616e67652e737667" alt="GitHub release" data-canonical-src="https://img.shields.io/badge/release-download-orange.svg" style="max-width:100%;"></a>
+
 首先添加maven依赖：
 
 ```
