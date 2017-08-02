@@ -6,8 +6,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.MessageQueueSelector;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.Message;
 
 import javax.annotation.PreDestroy;
@@ -21,6 +23,8 @@ import java.nio.charset.Charset;
 public abstract class AbstractMQProducer {
 
     private static Gson gson = new Gson();
+
+    private MessageQueueSelector messageQueueSelector = new SelectMessageQueueByHash();
 
     public AbstractMQProducer() {
     }
@@ -97,7 +101,11 @@ public abstract class AbstractMQProducer {
      */
     public void sendOneWay(String topic, String tag, Object msgObj) throws MQException {
         try {
+            if(null == msgObj) {
+                return;
+            }
             producer.sendOneway(genMessage(topic, tag, msgObj));
+            log.info("send onway message success : {}", msgObj);
         } catch (Exception e) {
             log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
             throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
@@ -112,6 +120,43 @@ public abstract class AbstractMQProducer {
      */
     public void sendOneWay(Object msgObj) throws MQException {
         sendOneWay("", "", msgObj);
+    }
+
+    /**
+     * fire and forget 不关心消息是否送达，可以提高发送tps
+     *
+     * @param tag
+     * @param msgObj
+     * @throws MQException
+     */
+    public void sendOneWay(String tag, Object msgObj) throws MQException {
+        sendOneWay("", tag, msgObj);
+    }
+
+
+    /**
+     * 可以保证同一个queue有序
+     *
+     * @param topic
+     * @param tag
+     * @param msgObj
+     * @param hashKey 用于hash后选择queue的key
+     */
+    public void sendOneWayOrderly(String topic, String tag, Object msgObj, String hashKey) {
+        if(null == msgObj) {
+            return;
+        }
+        if(StringUtils.isEmpty(hashKey)) {
+            // fall back to normal
+            sendOneWay(topic, tag, msgObj);
+        }
+        try {
+            producer.sendOneway(genMessage(topic, tag, msgObj), messageQueueSelector, hashKey);
+            log.info("send onway message orderly success : {}", msgObj);
+        } catch (Exception e) {
+            log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
+            throw new MQException("顺序消息发送失败，topic :" + topic + ",e:" + e.getMessage());
+        }
     }
 
     /**
@@ -142,6 +187,42 @@ public abstract class AbstractMQProducer {
      */
     public void synSend(Object msgObj) throws MQException {
         synSend("", "", msgObj);
+    }
+
+    /**
+     * 同步发送消息
+     * @param tag  消息tag
+     * @param msgObj  消息体
+     * @throws MQException
+     */
+    public void synSend(String tag, Object msgObj) throws MQException {
+        synSend("", tag, msgObj);
+    }
+
+    /**
+     * 同步发送消息
+     * @param topic  topic
+     * @param tag tag
+     * @param msgObj  消息体
+     * @param hashKey  用于hash后选择queue的key
+     * @throws MQException
+     */
+    public void synSendOrderly(String topic, String tag, Object msgObj, String hashKey) throws MQException {
+        if(null == msgObj) {
+            return;
+        }
+        if(StringUtils.isEmpty(hashKey)) {
+            // fall back to normal
+            synSend(topic, tag, msgObj);
+        }
+        try {
+            SendResult sendResult = producer.send(genMessage(topic, tag, msgObj), messageQueueSelector, hashKey);
+            log.info("send rocketmq message orderly ,messageId : {}", sendResult.getMsgId());
+            this.doAfterSynSend(sendResult);
+        } catch (Exception e) {
+            log.error("顺序消息发送失败，topic : {}, msgObj {}", topic, msgObj);
+            throw new MQException("顺序消息发送失败，topic :" + topic + ",e:" + e.getMessage());
+        }
     }
 
     /**
@@ -176,8 +257,46 @@ public abstract class AbstractMQProducer {
     }
 
     /**
+     * 异步发送消息不带tag和topic
+     * @param tag msgtag
+     * @param msgObj msgObj
+     * @param sendCallback 回调
+     * @throws MQException
+     */
+    public void asynSend(String tag, Object msgObj, SendCallback sendCallback) throws MQException {
+        asynSend("", tag, msgObj, sendCallback);
+    }
+
+    /**
+     * 异步发送消息带tag
+     * @param topic topic
+     * @param tag tag
+     * @param msgObj msgObj
+     * @param sendCallback 回调
+     * @param hashKey 用于hash后选择queue的key
+     * @throws MQException
+     */
+    public void asynSend(String topic, String tag, Object msgObj, SendCallback sendCallback, String hashKey) throws MQException {
+        if (null == msgObj) {
+            return;
+        }
+        if(StringUtils.isEmpty(hashKey)) {
+            // fall back to normal
+            asynSend(topic, tag, msgObj, sendCallback);
+        }
+        try {
+            producer.send(genMessage(topic, tag, msgObj), messageQueueSelector, hashKey, sendCallback);
+            log.info("send rocketmq message asyn");
+        } catch (Exception e) {
+            log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
+            throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
+        }
+    }
+
+    /**
      * 兼容buick中的方式
      *
+     * @deprecated
      * @param msgObj
      * @throws MQException
      */

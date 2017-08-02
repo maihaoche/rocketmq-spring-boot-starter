@@ -3,12 +3,13 @@ package com.maihaoche.starter.mq.config;
 import com.maihaoche.starter.mq.annotation.MQConsumer;
 import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -49,7 +50,8 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
         }
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
         consumer.setNamesrvAddr(mqProperties.getNameServerAddress());
-        consumer.subscribe(topic, mqConsumer.tag());
+        consumer.setMessageModel(MessageModel.valueOf(mqConsumer.messageMode()));
+        consumer.subscribe(topic, StringUtils.join(mqConsumer.tag(),"||"));
         consumer.setInstanceName(UUID.randomUUID().toString());
         consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) -> {
             if(!AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())) {

@@ -15,5 +15,6 @@ import java.lang.annotation.*;
 public @interface MQConsumer {
     String consumerGroup();
     String topic();
-    String tag() default "*";
+    String messageMode() default "CLUSTERING";
+    String[] tag() default {"*"};
 }

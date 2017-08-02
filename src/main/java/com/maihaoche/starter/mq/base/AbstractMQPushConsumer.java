@@ -39,8 +39,13 @@ public abstract class AbstractMQPushConsumer<T> {
      */
     public ConsumeConcurrentlyStatus dealMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         for(MessageExt messageExt : list) {
+            if(messageExt.getReconsumeTimes() != 0) {
+                log.info("re-consume times: {}" , messageExt.getReconsumeTimes());
+            }
+            log.info("receive msgId: {}, tags : {}" , messageExt.getMsgId(), messageExt.getTags());
             T t = parseMessage(messageExt);
             if( null != t && !process(t)) {
+                log.warn("consume fail , ask for re-consume , msgId: {}", messageExt.getMsgId());
                 return ConsumeConcurrentlyStatus.RECONSUME_LATER;
             }
         }
@@ -77,7 +82,9 @@ public abstract class AbstractMQPushConsumer<T> {
         if (superType instanceof ParameterizedType) {
             return ((ParameterizedType) superType).getActualTypeArguments()[0];
         } else {
-            throw new RuntimeException("Unkown parameterized type.");
+            // 如果没有定义泛型，解析为Object
+            return Object.class;
+//            throw new RuntimeException("Unkown parameterized type.");
         }
     }
 }
