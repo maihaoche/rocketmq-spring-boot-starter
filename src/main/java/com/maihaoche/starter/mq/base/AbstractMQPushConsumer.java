@@ -36,7 +36,7 @@ public abstract class AbstractMQPushConsumer<T> {
      * 继承这个方法处理消息
      *
      * @param message 消息范型
-     * @return
+     * @return 处理结果
      */
     public abstract boolean process(T message);
 
@@ -45,7 +45,7 @@ public abstract class AbstractMQPushConsumer<T> {
      *
      * @param list 消息列表
      * @param consumeConcurrentlyContext 上下文
-     * @return
+     * @return 消费状态
      */
     public ConsumeConcurrentlyStatus dealMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         for(MessageExt messageExt : list) {
@@ -67,7 +67,7 @@ public abstract class AbstractMQPushConsumer<T> {
      *
      * @param list 消息列表
      * @param consumeOrderlyContext 上下文
-     * @return
+     * @return 处理结果
      */
     public ConsumeOrderlyStatus dealMessage(List<MessageExt> list, ConsumeOrderlyContext consumeOrderlyContext) {
         for(MessageExt messageExt : list) {
@@ -88,7 +88,7 @@ public abstract class AbstractMQPushConsumer<T> {
      * 反序列化解析消息
      *
      * @param message  消息体
-     * @return
+     * @return 反序列化结果
      */
     private T parseMessage(MessageExt message) {
         if (message == null || message.getBody() == null) {
@@ -111,7 +111,7 @@ public abstract class AbstractMQPushConsumer<T> {
     /**
      * 解析消息类型
      *
-     * @return
+     * @return 消息类型
      */
     private Type getMessageType() {
         Type superType = this.getClass().getGenericSuperclass();

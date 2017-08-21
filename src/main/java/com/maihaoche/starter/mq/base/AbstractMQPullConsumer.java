@@ -88,7 +88,6 @@ public abstract class AbstractMQPullConsumer<T> {
      * 继承这个方法处理消息
      *
      * @param message 消息范型
-     * @return
      */
     public abstract void process(T message);
 
@@ -96,7 +95,6 @@ public abstract class AbstractMQPullConsumer<T> {
      * 原生dealMessage方法，可以重写此方法自定义序列化和返回消费成功的相关逻辑
      *
      * @param list 消息列表
-     * @return
      */
     public void dealMessage(List<MessageExt> list) {
         for(MessageExt messageExt : list) {
@@ -113,7 +111,7 @@ public abstract class AbstractMQPullConsumer<T> {
      * 反序列化解析消息
      *
      * @param message  消息体
-     * @return
+     * @return 序列化结果
      */
     private T parseMessage(MessageExt message) {
         if (message == null || message.getBody() == null) {
@@ -136,7 +134,7 @@ public abstract class AbstractMQPullConsumer<T> {
     /**
      * 解析消息类型
      *
-     * @return
+     * @return 消息类型
      */
     private Type getMessageType() {
         Type superType = this.getClass().getGenericSuperclass();
