@@ -2,6 +2,7 @@ package com.maihaoche.starter.mq.base;
 
 import com.google.gson.Gson;
 import com.maihaoche.starter.mq.MQException;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +46,7 @@ public abstract class AbstractMQProducer {
     }
 
     @Setter
+    @Getter
     private DefaultMQProducer producer;
 
     @PreDestroy
@@ -75,8 +77,8 @@ public abstract class AbstractMQProducer {
 
     private Message genMessage(String topic, String tag, Object msgObj) {
         String str = gson.toJson(msgObj);
-        if(StringUtils.isEmpty(topic)) {
-            if(StringUtils.isEmpty(getTopic())) {
+        if (StringUtils.isEmpty(topic)) {
+            if (StringUtils.isEmpty(getTopic())) {
                 throw new RuntimeException("no topic defined to send this message");
             }
             topic = getTopic();
@@ -101,14 +103,14 @@ public abstract class AbstractMQProducer {
      */
     public void sendOneWay(String topic, String tag, Object msgObj) throws MQException {
         try {
-            if(null == msgObj) {
+            if (null == msgObj) {
                 return;
             }
             producer.sendOneway(genMessage(topic, tag, msgObj));
             log.info("send onway message success : {}", msgObj);
         } catch (Exception e) {
-            log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
-            throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
+            log.error("消息发送失败，topic : {}, e {}", topic, e);
+            throw new MQException("消息发送失败，topic :" + topic + ",e:" + e);
         }
     }
 
@@ -143,10 +145,10 @@ public abstract class AbstractMQProducer {
      * @param hashKey 用于hash后选择queue的key
      */
     public void sendOneWayOrderly(String topic, String tag, Object msgObj, String hashKey) {
-        if(null == msgObj) {
+        if (null == msgObj) {
             return;
         }
-        if(StringUtils.isEmpty(hashKey)) {
+        if (StringUtils.isEmpty(hashKey)) {
             // fall back to normal
             sendOneWay(topic, tag, msgObj);
         }
@@ -161,14 +163,15 @@ public abstract class AbstractMQProducer {
 
     /**
      * 同步发送消息
+     *
      * @param topic  topic
-     * @param tag tag
-     * @param msgObj  消息体
+     * @param tag    tag
+     * @param msgObj 消息体
      * @throws MQException
      */
     public void synSend(String topic, String tag, Object msgObj) throws MQException {
         try {
-            if(null == msgObj) {
+            if (null == msgObj) {
                 return;
             }
             SendResult sendResult = producer.send(genMessage(topic, tag, msgObj));
@@ -182,7 +185,8 @@ public abstract class AbstractMQProducer {
 
     /**
      * 同步发送消息
-     * @param msgObj  消息体
+     *
+     * @param msgObj 消息体
      * @throws MQException
      */
     public void synSend(Object msgObj) throws MQException {
@@ -191,8 +195,9 @@ public abstract class AbstractMQProducer {
 
     /**
      * 同步发送消息
-     * @param tag  消息tag
-     * @param msgObj  消息体
+     *
+     * @param tag    消息tag
+     * @param msgObj 消息体
      * @throws MQException
      */
     public void synSend(String tag, Object msgObj) throws MQException {
@@ -201,17 +206,18 @@ public abstract class AbstractMQProducer {
 
     /**
      * 同步发送消息
-     * @param topic  topic
-     * @param tag tag
+     *
+     * @param topic   topic
+     * @param tag     tag
      * @param msgObj  消息体
-     * @param hashKey  用于hash后选择queue的key
+     * @param hashKey 用于hash后选择queue的key
      * @throws MQException
      */
     public void synSendOrderly(String topic, String tag, Object msgObj, String hashKey) throws MQException {
-        if(null == msgObj) {
+        if (null == msgObj) {
             return;
         }
-        if(StringUtils.isEmpty(hashKey)) {
+        if (StringUtils.isEmpty(hashKey)) {
             // fall back to normal
             synSend(topic, tag, msgObj);
         }
@@ -227,9 +233,10 @@ public abstract class AbstractMQProducer {
 
     /**
      * 异步发送消息带tag
-     * @param topic topic
-     * @param tag tag
-     * @param msgObj msgObj
+     *
+     * @param topic        topic
+     * @param tag          tag
+     * @param msgObj       msgObj
      * @param sendCallback 回调
      * @throws MQException
      */
@@ -248,7 +255,8 @@ public abstract class AbstractMQProducer {
 
     /**
      * 异步发送消息不带tag和topic
-     * @param msgObj msgObj
+     *
+     * @param msgObj       msgObj
      * @param sendCallback 回调
      * @throws MQException
      */
@@ -258,8 +266,9 @@ public abstract class AbstractMQProducer {
 
     /**
      * 异步发送消息不带tag和topic
-     * @param tag msgtag
-     * @param msgObj msgObj
+     *
+     * @param tag          msgtag
+     * @param msgObj       msgObj
      * @param sendCallback 回调
      * @throws MQException
      */
@@ -269,18 +278,19 @@ public abstract class AbstractMQProducer {
 
     /**
      * 异步发送消息带tag
-     * @param topic topic
-     * @param tag tag
-     * @param msgObj msgObj
+     *
+     * @param topic        topic
+     * @param tag          tag
+     * @param msgObj       msgObj
      * @param sendCallback 回调
-     * @param hashKey 用于hash后选择queue的key
+     * @param hashKey      用于hash后选择queue的key
      * @throws MQException
      */
     public void asynSend(String topic, String tag, Object msgObj, SendCallback sendCallback, String hashKey) throws MQException {
         if (null == msgObj) {
             return;
         }
-        if(StringUtils.isEmpty(hashKey)) {
+        if (StringUtils.isEmpty(hashKey)) {
             // fall back to normal
             asynSend(topic, tag, msgObj, sendCallback);
         }
@@ -296,12 +306,12 @@ public abstract class AbstractMQProducer {
     /**
      * 兼容buick中的方式
      *
-     * @deprecated
      * @param msgObj
      * @throws MQException
+     * @deprecated please use more specific method
      */
     public void sendMessage(Object msgObj) throws MQException {
-        if(StringUtils.isEmpty(getTopic())) {
+        if (StringUtils.isEmpty(getTopic())) {
             throw new MQException("如果用这种方式发送消息，请在实例中重写 getTopic() 方法返回需要发送的topic");
         }
         sendOneWay("", "", msgObj);
@@ -310,7 +320,7 @@ public abstract class AbstractMQProducer {
     /**
      * 重写此方法处理发送后的逻辑
      *
-     * @param sendResult  发送结果
+     * @param sendResult 发送结果
      */
     public void doAfterSynSend(SendResult sendResult) {}
 }

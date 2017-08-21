@@ -16,5 +16,6 @@ public @interface MQConsumer {
     String consumerGroup();
     String topic();
     String messageMode() default "CLUSTERING";
+    String consumeMode() default "CONCURRENTLY";
     String[] tag() default {"*"};
 }
