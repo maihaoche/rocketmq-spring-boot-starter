@@ -2,6 +2,7 @@ package com.maihaoche.starter.mq.base;
 
 import com.google.gson.Gson;
 import com.maihaoche.starter.mq.MQException;
+import com.maihaoche.starter.mq.annotation.MQKey;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.Message;
 
 import javax.annotation.PreDestroy;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 
 /**
@@ -76,6 +79,24 @@ public abstract class AbstractMQProducer {
     }
 
     private Message genMessage(String topic, String tag, Object msgObj) {
+        String messageKey= "";
+        try {
+            Field[] fields = msgObj.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                Annotation[] allFAnnos= field.getAnnotations();
+                if(allFAnnos.length > 0) {
+                    for (int i = 0; i < allFAnnos.length; i++) {
+                        if(allFAnnos[i].annotationType().equals(MQKey.class)) {
+                            field.setAccessible(true);
+                            MQKey mqKey = MQKey.class.cast(allFAnnos[i]);
+                            messageKey = StringUtils.isEmpty(mqKey.prefix()) ? field.get(msgObj).toString() : (mqKey.prefix() + field.get(msgObj).toString());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("parse key error : {}" , e.getMessage());
+        }
         String str = gson.toJson(msgObj);
         if(StringUtils.isEmpty(topic)) {
             if(StringUtils.isEmpty(getTopic())) {
@@ -88,6 +109,9 @@ public abstract class AbstractMQProducer {
             message.setTags(tag);
         } else if (!StringUtils.isEmpty(getTag())) {
             message.setTags(getTag());
+        }
+        if(StringUtils.isNotEmpty(messageKey)) {
+            message.setKeys(messageKey);
         }
         return message;
     }

@@ -28,6 +28,12 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
 //            if(StringUtils.isEmpty(mqProperties.getProducerGroup())) {
 //                throw new RuntimeException("请在配置文件中指定消息发送方group！");
 //            }
+            if(StringUtils.isEmpty(mqProperties.getProducerGroup())) {
+                throw new RuntimeException("producer group must be defined");
+            }
+            if(StringUtils.isEmpty(mqProperties.getNameServerAddress())) {
+                throw new RuntimeException("name server address must be defined");
+            }
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
             producer.setNamesrvAddr(mqProperties.getNameServerAddress());
             producer.start();

@@ -32,7 +32,7 @@
 
     <groupId>com.maihaoche</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 
     <scm>
         <url>https://github.com/maihaoche/rocketmq-spring-boot-starter</url>
@@ -66,6 +66,11 @@
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
             <version>${rocketmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <profiles>
