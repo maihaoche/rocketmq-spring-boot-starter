@@ -72,7 +72,7 @@ lateinit var demoProducer:DemoProducer
 ...
     
 // 发送
-demoProducer.synSend("suclogger", DemoMessage(1, "plain_message"))
+demoProducer.syncSend("suclogger", DemoMessage(1, "plain_message"))
     
 ```
 
