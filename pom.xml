@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <properties>
         <java.version>1.8</java.version>
-        <rocketmq.version>4.0.0-incubating</rocketmq.version>
+        <rocketmq.version>4.1.0-incubating</rocketmq.version>
         <file_encoding>UTF-8</file_encoding>
     </properties>
 
