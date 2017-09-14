@@ -259,13 +259,13 @@ public abstract class AbstractMQProducer {
      * @param sendCallback 回调
      * @throws MQException 消息异常
      */
-    public void asynSend(String topic, String tag, Object msgObj, SendCallback sendCallback) throws MQException {
+    public void asyncSend(String topic, String tag, Object msgObj, SendCallback sendCallback) throws MQException {
         try {
             if (null == msgObj) {
                 return;
             }
             producer.send(genMessage(topic, tag, msgObj), sendCallback);
-            log.info("send rocketmq message asyn");
+            log.info("send rocketmq message async");
         } catch (Exception e) {
             log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
             throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
@@ -278,8 +278,8 @@ public abstract class AbstractMQProducer {
      * @param sendCallback 回调
      * @throws MQException 消息异常
      */
-    public void asynSend(Object msgObj, SendCallback sendCallback) throws MQException {
-        asynSend("", "", msgObj, sendCallback);
+    public void asyncSend(Object msgObj, SendCallback sendCallback) throws MQException {
+        asyncSend("", "", msgObj, sendCallback);
     }
 
     /**
@@ -289,8 +289,8 @@ public abstract class AbstractMQProducer {
      * @param sendCallback 回调
      * @throws MQException 消息异常
      */
-    public void asynSend(String tag, Object msgObj, SendCallback sendCallback) throws MQException {
-        asynSend("", tag, msgObj, sendCallback);
+    public void asyncSend(String tag, Object msgObj, SendCallback sendCallback) throws MQException {
+        asyncSend("", tag, msgObj, sendCallback);
     }
 
     /**
@@ -302,35 +302,21 @@ public abstract class AbstractMQProducer {
      * @param hashKey 用于hash后选择queue的key
      * @throws MQException 消息异常
      */
-    public void asynSend(String topic, String tag, Object msgObj, SendCallback sendCallback, String hashKey) throws MQException {
+    public void asyncSend(String topic, String tag, Object msgObj, SendCallback sendCallback, String hashKey) throws MQException {
         if (null == msgObj) {
             return;
         }
         if(StringUtils.isEmpty(hashKey)) {
             // fall back to normal
-            asynSend(topic, tag, msgObj, sendCallback);
+            asyncSend(topic, tag, msgObj, sendCallback);
         }
         try {
             producer.send(genMessage(topic, tag, msgObj), messageQueueSelector, hashKey, sendCallback);
-            log.info("send rocketmq message asyn");
+            log.info("send rocketmq message async");
         } catch (Exception e) {
             log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
             throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
         }
-    }
-
-    /**
-     * 兼容buick中的方式
-     *
-     * @deprecated please use more specific method
-     * @param msgObj 消息体
-     * @throws MQException 消息异常
-     */
-    public void sendMessage(Object msgObj) throws MQException {
-        if(StringUtils.isEmpty(getTopic())) {
-            throw new MQException("如果用这种方式发送消息，请在实例中重写 getTopic() 方法返回需要发送的topic");
-        }
-        sendOneWay("", "", msgObj);
     }
 
     /**

@@ -31,6 +31,16 @@ class CamaroDemoApplication {
 }
 ```
 
+定义消息体，通过`@MQKey`注解将对应字段设置为消息key，可以在注解中通过`prefix`定义key的前缀：
+
+```
+data class DemoMessage(
+        @MQKey(prefix = "sku_")
+        val skuId:Long,
+        val skuType:String)
+
+```
+
 创建发送方(详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Provider))：
 
 ```
@@ -62,7 +72,7 @@ lateinit var demoProducer:DemoProducer
 ...
     
 // 发送
-demoProducer.synSend("suclogger", "test message")
+demoProducer.synSend("suclogger", DemoMessage(1, "plain_message"))
     
 ```
 
