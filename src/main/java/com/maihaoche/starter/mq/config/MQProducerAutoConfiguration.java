@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Created by yipin on 2017/6/29.
@@ -24,6 +25,11 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
 
     @PostConstruct
     public void init() throws Exception {
+        Map<String, Object> beans = applicationContext.getBeansWithAnnotation(MQProducer.class);
+        //对于仅仅只存在消息消费者的项目，无需构建生产者
+        if(CollectionUtils.isEmpty(beans)){
+            return;
+        }
         if(producer == null) {
 //            if(StringUtils.isEmpty(mqProperties.getProducerGroup())) {
 //                throw new RuntimeException("请在配置文件中指定消息发送方group！");
@@ -38,7 +44,6 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
             producer.setNamesrvAddr(mqProperties.getNameServerAddress());
             producer.start();
         }
-        Map<String, Object> beans = applicationContext.getBeansWithAnnotation(MQProducer.class);
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
             publishProducer(entry.getKey(), entry.getValue());
         }
