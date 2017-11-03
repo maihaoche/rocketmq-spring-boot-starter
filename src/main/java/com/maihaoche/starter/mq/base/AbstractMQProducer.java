@@ -14,7 +14,6 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.Message;
 
-import javax.annotation.PreDestroy;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -25,6 +24,8 @@ import java.nio.charset.Charset;
  */
 @Slf4j
 public abstract class AbstractMQProducer {
+
+    private static final String[] DELAY_ARRAY = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h".split(" ");
 
     private static Gson gson = new Gson();
 
@@ -109,6 +110,7 @@ public abstract class AbstractMQProducer {
     /**
      * fire and forget 不关心消息是否送达，可以提高发送tps
      *
+     * @deprecated may cause message lost because of ignore error
      * @param topic topic
      * @param tag tag
      * @param msgObj 消息体
@@ -130,6 +132,7 @@ public abstract class AbstractMQProducer {
     /**
      * fire and forget 不关心消息是否送达，可以提高发送tps
      *
+     * @deprecated may cause message lost because of ignore error
      * @param msgObj 消息体
      * @throws MQException 消息异常
      */
@@ -140,6 +143,7 @@ public abstract class AbstractMQProducer {
     /**
      * fire and forget 不关心消息是否送达，可以提高发送tps
      *
+     * @deprecated may cause message lost because of ignore error
      * @param tag tag
      * @param msgObj 消息体
      * @throws MQException 消息异常
@@ -152,6 +156,7 @@ public abstract class AbstractMQProducer {
     /**
      * 可以保证同一个queue有序
      *
+     * @deprecated may cause message lost because of ignore error
      * @param topic topic
      * @param tag tag
      * @param msgObj 消息体
@@ -194,6 +199,34 @@ public abstract class AbstractMQProducer {
             throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
         }
     }
+
+
+    /**
+     * 同步发送消息
+     * @param topic  topic
+     * @param tag tag
+     * @param msgObj  消息体
+     * @param delayTimeLevel  默认延迟等级 : 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h， 传入1代表1s, 2代表5s, 以此类推
+     * @throws MQException 消息异常
+     */
+    public void syncSendWithDelay(String topic, String tag, Object msgObj, int delayTimeLevel) throws MQException {
+        try {
+            if(null == msgObj) {
+                return;
+            }
+            Message delayedMsg = genMessage(topic, tag, msgObj);
+            if(delayTimeLevel > 0 && delayTimeLevel <= DELAY_ARRAY.length) {
+                delayedMsg.setDelayTimeLevel(delayTimeLevel);
+            }
+            SendResult sendResult = producer.send(delayedMsg);
+            log.info("sync send rocketmq message with delay, messageId : {}, default delay interval: {}", sendResult.getMsgId(), DELAY_ARRAY[delayTimeLevel-1]);
+            this.doAfterSyncSend(sendResult);
+        } catch (Exception e) {
+            log.error("消息发送失败，topic : {}, msgObj {}", topic, msgObj);
+            throw new MQException("消息发送失败，topic :" + topic + ",e:" + e.getMessage());
+        }
+    }
+
 
     /**
      * 同步发送消息
