@@ -1,0 +1,11 @@
+notifications:
+  email:
+    recipients:
+      - pufang@maihaoche.com
+  on_success: change
+  on_failure: always
+
+language: java
+
+sudo: false
+script: mvn clean verify
