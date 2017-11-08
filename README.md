@@ -54,7 +54,9 @@ class DemoProducer : AbstractMQProducer() {
 ```
 @MQConsumer(consumerGroup = "local_pufang_test_consumer", topic = "suclogger")
 class DemoConsumer : AbstractMQPushConsumer<DemoMessage>() {
-    override fun process(message:DemoMessage) : Boolean {
+    override fun process(message: DemoMessage?, extMap: MutableMap<String, Any>?): Boolean {
+        // extMap 中包含messageExt中的属性和message.properties中的属性
+        println("message id : ${extMap!![MessageExtConst.PROPERTY_EXT_MSG_ID]}")
         return true
     }
 

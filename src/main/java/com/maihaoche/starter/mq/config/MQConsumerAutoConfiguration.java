@@ -3,6 +3,7 @@ package com.maihaoche.starter.mq.config;
 import com.maihaoche.starter.mq.annotation.MQConsumer;
 import com.maihaoche.starter.mq.base.AbstractMQPullConsumer;
 import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
+import com.maihaoche.starter.mq.base.MessageExtConst;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
@@ -68,10 +69,10 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
             consumer.subscribe(topic, StringUtils.join(mqConsumer.tag(),"||"));
             consumer.setInstanceName(UUID.randomUUID().toString());
             AbstractMQPushConsumer abstractMQPushConsumer = (AbstractMQPushConsumer) bean;
-            if(mqConsumer.consumeMode().equals("CONCURRENTLY")) {
+            if(MessageExtConst.CONSUME_MODE_CONCURRENTLY.equals(mqConsumer.consumeMode())) {
                 consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) ->
                         abstractMQPushConsumer.dealMessage(list, consumeConcurrentlyContext));
-            } else if(mqConsumer.consumeMode().equals("ORDERLY")) {
+            } else if(MessageExtConst.CONSUME_MODE_ORDERLY.equals(mqConsumer.consumeMode())) {
                 consumer.registerMessageListener((List<MessageExt> list, ConsumeOrderlyContext consumeOrderlyContext) ->
                         abstractMQPushConsumer.dealMessage(list, consumeOrderlyContext));
             } else {

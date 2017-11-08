@@ -1,16 +1,20 @@
 package com.maihaoche.starter.mq.base;
 
-import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.consumer.PullResult;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Created by yipin on 2017/6/27.
  * RocketMQ的消费者(Push模式)处理消息的接口
+ *
+ * @deprecated 不再维护，即将在0.0.6版本中移除
+ *
  */
 @Slf4j
 public abstract class AbstractMQPullConsumer<T> extends AbstractMQConsumer<T>{
