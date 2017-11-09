@@ -34,6 +34,7 @@ public class MessageExtConst {
     public static final String PROPERTY_EXT_COMMIT_LOG_OFFSET = "COMMIT_LOG_OFFSET";
     public static final String PROPERTY_EXT_RECONSUME_TIMES = "RECONSUME_TIMES";
     public static final String PROPERTY_EXT_PREPARED_TRANSACTION_OFFSET = "PREPARED_TRANSACTION_OFFSET";
+    public static final String PROPERTY_EXT_BODY_CRC = "BODY_CRC";
 
     /**
      *

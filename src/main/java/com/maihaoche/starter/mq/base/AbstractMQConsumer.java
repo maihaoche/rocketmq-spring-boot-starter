@@ -69,6 +69,7 @@ public abstract class AbstractMQConsumer<T> {
         extMap.put(MessageExtConst.PROPERTY_EXT_STORE_SIZE, message.getStoreSize());
         extMap.put(MessageExtConst.PROPERTY_EXT_STORE_TIMESTAMP, message.getStoreTimestamp());
         extMap.put(MessageExtConst.PROPERTY_EXT_SYS_FLAG, message.getSysFlag());
+        extMap.put(MessageExtConst.PROPERTY_EXT_BODY_CRC, message.getBodyCRC());
 
         return extMap;
     }
