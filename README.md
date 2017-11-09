@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.maihaoche</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 

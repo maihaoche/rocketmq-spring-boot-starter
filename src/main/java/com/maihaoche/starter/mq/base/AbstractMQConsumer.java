@@ -12,13 +12,9 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.util.Assert;
 
 /**
- * Comments：RocketMQ消费抽象基类
- * Author：Jay Chang
- * Create Date：2017/9/14
+ * Description：RocketMQ消费抽象基类
+ * Created by Jay Chang on 2017/9/14
  * Modified By：
- * Modified Date：
- * Why & What is modified：
- * Version：v1.0
  */
 @Slf4j
 public abstract class AbstractMQConsumer<T> {
