@@ -40,6 +40,10 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
             producer.setNamesrvAddr(mqProperties.getNameServerAddress());
             producer.start();
+
+            // register default mq producer to spring context
+            registerBean(DefaultMQProducer.class.getName(), producer);
+
         }
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
             publishProducer(entry.getKey(), entry.getValue());

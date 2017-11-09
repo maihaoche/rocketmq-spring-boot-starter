@@ -2,10 +2,10 @@ notifications:
   email:
     recipients:
       - pufang@maihaoche.com
-  on_success: change
-  on_failure: always
 
 language: java
 
 sudo: false
-script: mvn clean verify
+script:
+  - travis_retry mvn -B clean
+  - travis_retry mvn -B package jacoco:report coveralls:report

@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -23,10 +24,14 @@ import org.springframework.context.annotation.Configuration;
 public class MQBaseAutoConfiguration implements ApplicationContextAware {
     @Autowired
     protected MQProperties mqProperties;
-    protected ApplicationContext applicationContext;
+    protected ConfigurableApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+    }
+
+    void registerBean(String beanName, Object bean) {
+        applicationContext.getBeanFactory().registerSingleton(beanName, bean);
     }
 }
