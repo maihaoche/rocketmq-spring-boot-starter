@@ -25,6 +25,7 @@ public class MQProducerAutoConfigurationTest {
     private void prepareApplicationContextMissingConfigure() {
         this.context = new AnnotationConfigApplicationContext();
         this.context.register(TestProducerWithTopicAndTag.class);
+        MQProducerAutoConfiguration.setProducer(null);
         this.context.register(MQProducerAutoConfiguration.class);
         this.context.refresh();
     }
@@ -33,6 +34,7 @@ public class MQProducerAutoConfigurationTest {
         this.context = new AnnotationConfigApplicationContext();
         EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
         this.context.register(TestProducerWithTopicAndTag.class);
+        MQProducerAutoConfiguration.setProducer(null);
         this.context.register(MQProducerAutoConfiguration.class);
         this.context.refresh();
     }

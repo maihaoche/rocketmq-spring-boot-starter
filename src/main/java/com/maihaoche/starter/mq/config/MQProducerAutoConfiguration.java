@@ -2,15 +2,17 @@ package com.maihaoche.starter.mq.config;
 
 import com.maihaoche.starter.mq.annotation.MQProducer;
 import com.maihaoche.starter.mq.base.AbstractMQProducer;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Created by yipin on 2017/6/29.
@@ -21,7 +23,8 @@ import org.springframework.util.CollectionUtils;
 @ConditionalOnBean(MQBaseAutoConfiguration.class)
 public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
 
-    private DefaultMQProducer producer;
+    @Setter
+    private static DefaultMQProducer producer;
 
     @PostConstruct
     public void init() throws Exception {
@@ -31,20 +34,15 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
             return;
         }
         if(producer == null) {
-            if(StringUtils.isEmpty(mqProperties.getProducerGroup())) {
-                throw new RuntimeException("producer group must be defined");
-            }
-            if(StringUtils.isEmpty(mqProperties.getNameServerAddress())) {
-                throw new RuntimeException("name server address must be defined");
-            }
+            Assert.notNull(mqProperties.getProducerGroup(), "producer group must be defined");
+            Assert.notNull(mqProperties.getNameServerAddress(), "name server address must be defined");
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
             producer.setNamesrvAddr(mqProperties.getNameServerAddress());
             producer.start();
-
-            // register default mq producer to spring context
-            registerBean(DefaultMQProducer.class.getName(), producer);
-
         }
+        // register default mq producer to spring context
+        registerBean(DefaultMQProducer.class.getName(), producer);
+
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
             publishProducer(entry.getKey(), entry.getValue());
         }
