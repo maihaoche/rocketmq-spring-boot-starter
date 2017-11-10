@@ -1,7 +1,6 @@
 package com.maihaoche.starter.mq.config;
 
 import com.maihaoche.starter.mq.annotation.MQConsumer;
-import com.maihaoche.starter.mq.base.AbstractMQPullConsumer;
 import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
 import com.maihaoche.starter.mq.base.MessageExtConst;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -41,14 +41,9 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
         if(StringUtils.isEmpty(mqProperties.getNameServerAddress())) {
             throw new RuntimeException("name server address must be defined");
         }
-        if(StringUtils.isEmpty(mqConsumer.consumerGroup())) {
-            throw new RuntimeException("consumer's consumerGroup must be defined");
-        }
-        if(StringUtils.isEmpty(mqConsumer.topic())) {
-            throw new RuntimeException("consumer's topic must be defined");
-        }
-        if(!AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())
-                && !AbstractMQPullConsumer.class.isAssignableFrom(bean.getClass())) {
+        Assert.notNull(mqConsumer.consumerGroup(), "consumer's consumerGroup must be defined");
+        Assert.notNull(mqConsumer.topic(), "consumer's topic must be defined");
+        if(!AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())) {
             throw new RuntimeException(bean.getClass().getName() + " - consumer未实现Consumer抽象类");
         }
 
@@ -80,21 +75,6 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
             }
             abstractMQPushConsumer.setConsumer(consumer);
             consumer.start();
-        } else if (AbstractMQPullConsumer.class.isAssignableFrom(bean.getClass())) {
-
-            // 配置pull consumer
-
-            AbstractMQPullConsumer abstractMQPullConsumer = AbstractMQPullConsumer.class.cast(bean);
-
-            DefaultMQPullConsumer consumer = new DefaultMQPullConsumer(consumerGroup);
-            consumer.setNamesrvAddr(mqProperties.getNameServerAddress());
-            consumer.setMessageModel(MessageModel.valueOf(mqConsumer.messageMode()));
-            consumer.setInstanceName(UUID.randomUUID().toString());
-            consumer.start();
-
-            abstractMQPullConsumer.setTopic(topic);
-            abstractMQPullConsumer.setConsumer(consumer);
-            abstractMQPullConsumer.startInner();
         }
 
         log.info(String.format("%s is ready to subscribe message", bean.getClass().getName()));
