@@ -38,6 +38,7 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
             Assert.notNull(mqProperties.getNameServerAddress(), "name server address must be defined");
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
             producer.setNamesrvAddr(mqProperties.getNameServerAddress());
+            producer.setSendMsgTimeout(mqProperties.getSendMsgTimeout());
             producer.start();
         }
         // register default mq producer to spring context

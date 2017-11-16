@@ -19,7 +19,11 @@ public class MQProperties {
      */
     private String producerGroup;
     /**
-     * switch of trace message consumer: send message consumer info to topic: rmq_sys_TRACE_DATA
+     * config send message timeout
      */
-    private Boolean traceEnabled = Boolean.TRUE;
+    private Integer sendMsgTimeout = 3000;
+    /**
+     * switch of trace message consumer: send message consumer info to topic: MQ_TRACE_DATA
+     */
+    private Boolean traceEnabled = Boolean.FALSE;
 }
