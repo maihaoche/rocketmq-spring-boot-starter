@@ -26,7 +26,7 @@
 
 ##### 1. 添加maven依赖：
 
-```
+```java
 <dependency>
     <groupId>com.maihaoche</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
@@ -36,7 +36,7 @@
 
 ##### 2. 添加配置：
 
-```
+```java
 spring:
     rocketmq:
       name-server-address: 172.21.10.111:9876
@@ -53,7 +53,7 @@ spring:
 
 在springboot应用主入口添加`@EnableMQConfiguration`注解开启自动装配：
 
-```
+```java
 @SpringBootApplication
 @EnableMQConfiguration
 class DemoApplication {
@@ -65,7 +65,7 @@ class DemoApplication {
 通过我们提供的`Builder`类创建消息对象，详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/构建消息体)
 
 
-```
+```java
 MessageBuilder.of(new MSG_POJO()).topic("some-msg-topic").build();
 ```
 
@@ -75,7 +75,7 @@ MessageBuilder.of(new MSG_POJO()).topic("some-msg-topic").build();
 详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Provider)：
 
 
-```
+```java
 @MQProducer
 public class DemoProducer extends AbstractMQProducer{
 }
@@ -85,7 +85,7 @@ public class DemoProducer extends AbstractMQProducer{
 
 详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Consumer)：
 
-```
+```java
 @MQConsumer(topic = "suclogger-test-cluster", consumerGroup = "local_sucloger_dev")
 public class DemoConsumer extends AbstractMQPushConsumer {
 
@@ -100,7 +100,7 @@ public class DemoConsumer extends AbstractMQPushConsumer {
 
 ##### 7. 发送消息：
 
-```
+```java
 
 // 注入发送者
 @Autowired
