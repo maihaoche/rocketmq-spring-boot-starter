@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class MQProducerAutoConfigurationTest {
 
@@ -63,11 +64,10 @@ public class MQProducerAutoConfigurationTest {
     }
 
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testEmpty() {
         prepareApplicationContextEmpty();
-        // throws NoSuchBeanDefinitionException which is subclass of RuntimeException
-        context.getBean(DefaultMQProducer.class);
+        assertNull(context.getBean(DefaultMQProducer.class));
     }
 
     @Test(expected = RuntimeException.class)

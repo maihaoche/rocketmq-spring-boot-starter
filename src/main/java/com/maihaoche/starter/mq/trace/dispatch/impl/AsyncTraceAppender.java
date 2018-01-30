@@ -38,9 +38,8 @@ public class AsyncTraceAppender extends AsyncAppender {
     /**
      * 构造消息类型的轨迹数据发送器
      *
-     * @param properties
-     *            参数属性
-     * @throws MQClientException
+     * @param properties 参数属性
+     * @throws MQClientException 消息异常
      */
     public AsyncTraceAppender(Properties properties) throws MQClientException {
         transDataList = new ArrayList<OnsTraceTransferBean>();
@@ -68,7 +67,7 @@ public class AsyncTraceAppender extends AsyncAppender {
     /**
      * 往消息缓冲区编码轨迹数据
      *
-     * @param context
+     * @param context 上下文
      */
     @Override
     public void append(Object context) {

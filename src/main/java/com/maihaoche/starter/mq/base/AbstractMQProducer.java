@@ -66,7 +66,7 @@ public abstract class AbstractMQProducer {
 
     /**
      * 重写此方法处理发送后的逻辑
-     *
+     * @param message  发送消息体
      * @param sendResult  发送结果
      */
     public void doAfterSyncSend(Message message, SendResult sendResult) {}

@@ -7,7 +7,7 @@ package com.maihaoche.starter.mq.trace.dispatch;
 public abstract class AsyncAppender {
     /**
      *编码数据上下文到缓冲区
-     * @param context
+     * @param context 上下文
      */
     public abstract void append(Object context);
 

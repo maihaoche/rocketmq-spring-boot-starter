@@ -7,8 +7,8 @@ import java.util.Enumeration;
 /**
  * 消息轨迹工具类
  *
- * @author: manhong.yqd<jodie.yqd@gmail.com>
- * @since: 14-6-20
+ * author: manhong.yqd
+ * since: 14-6-20
  */
 public class MixUtils {
     public static String getLocalAddress() {

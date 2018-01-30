@@ -20,7 +20,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContext() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
         this.context.register(TestConsumer.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -28,7 +28,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContextCMOrderly() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
         this.context.register(TestConsumerOrderly.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -36,7 +36,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContextCMError() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
         this.context.register(TestConsumerErrorCM.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -51,7 +51,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContextMissingParent() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
         this.context.register(TestConsumerMissingParent.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();

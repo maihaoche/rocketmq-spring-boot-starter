@@ -14,8 +14,8 @@ public class OnsTraceDataEncoder {
     /**
      * 从轨迹数据字符串中解析出traceContext列表
      * 
-     * @param traceData
-     * @return
+     * @param traceData trace数据
+     * @return trace列表
      */
     public static List<OnsTraceContext> decoderFromTraceDataString(String traceData) {
         List<OnsTraceContext> resList = new ArrayList<OnsTraceContext>();
@@ -88,8 +88,8 @@ public class OnsTraceDataEncoder {
     /**
      * 将轨迹上下文编码成轨迹数据字符串以及keyset集合
      * 
-     * @param ctx
-     * @return
+     * @param ctx 上下文
+     * @return trace bean
      */
     public static OnsTraceTransferBean encoderFromContextBean(OnsTraceContext ctx) {
         if (ctx == null) {

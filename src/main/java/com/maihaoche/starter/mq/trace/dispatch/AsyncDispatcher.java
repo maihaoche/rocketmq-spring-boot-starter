@@ -23,7 +23,7 @@ public abstract class AsyncDispatcher {
 
     /**
      * 强制调用写操作
-     * @throws IOException
+     * @throws IOException io异常
      */
     public abstract void flush() throws IOException;
 }
