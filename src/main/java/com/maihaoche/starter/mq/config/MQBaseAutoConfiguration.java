@@ -22,8 +22,13 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter({AbstractMQProducer.class, AbstractMQPushConsumer.class})
 @EnableConfigurationProperties(MQProperties.class)
 public class MQBaseAutoConfiguration implements ApplicationContextAware {
-    @Autowired
     protected MQProperties mqProperties;
+
+    @Autowired
+    public void setMqProperties(MQProperties mqProperties) {
+        this.mqProperties = mqProperties;
+    }
+
     protected ConfigurableApplicationContext applicationContext;
 
     @Override
@@ -31,7 +36,5 @@ public class MQBaseAutoConfiguration implements ApplicationContextAware {
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
     }
 
-    void registerBean(String beanName, Object bean) {
-        applicationContext.getBeanFactory().registerSingleton(beanName, bean);
-    }
 }
+

@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * RocketMQ的配置参数
  */
 @Data
-@ConfigurationProperties(prefix = "rocketmq")
+@ConfigurationProperties(prefix = "spring.rocketmq")
 public class MQProperties {
     /**
      * config name server address
@@ -23,7 +23,13 @@ public class MQProperties {
      */
     private Integer sendMsgTimeout = 3000;
     /**
-     * switch of trace message consumer: send message consumer info to topic: MQ_TRACE_DATA
+     * switch of trace message consumer: send message consumer info to topic: rmq_sys_TRACE_DATA
      */
-    private Boolean traceEnabled = Boolean.FALSE;
+    private Boolean traceEnabled = Boolean.TRUE;
+
+    /**
+     * switch of send message with vip channel
+     */
+    private Boolean vipChannelEnabled = Boolean.TRUE;
+
 }

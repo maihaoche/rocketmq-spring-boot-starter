@@ -18,13 +18,13 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextEmpty() {
         this.context = new AnnotationConfigApplicationContext();
-        this.context.register(MQProducerAutoConfiguration.class);
+        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
         this.context.refresh();
     }
 
     private void prepareApplicationContextMissingConfigure() {
         this.context = new AnnotationConfigApplicationContext();
-        this.context.register(TestProducerWithTopicAndTag.class);
+        this.context.register(TestProducer.class);
         MQProducerAutoConfiguration.setProducer(null);
         this.context.register(MQProducerAutoConfiguration.class);
         this.context.refresh();
@@ -32,8 +32,8 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextMissingProducerGroupConfigure() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
-        this.context.register(TestProducerWithTopicAndTag.class);
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        this.context.register(TestProducer.class);
         MQProducerAutoConfiguration.setProducer(null);
         this.context.register(MQProducerAutoConfiguration.class);
         this.context.refresh();
@@ -41,7 +41,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextWithoutParent() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
         EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.producer-group:test-producer-group");
         this.context.register(TestProducerNoParent.class);
         this.context.register(MQProducerAutoConfiguration.class);
@@ -50,21 +50,10 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContext() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.producer-group:test-producer-group");
-        this.context.register(TestProducerWithTopicAndTag.class);
-        this.context.register(MQProducerAutoConfiguration.class);
-        this.context.refresh();
-    }
-
-    private void prepareApplicationContextWithTopicAngTag() {
-        this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.name-server-address:127.0.0.1:9876");
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.producer-group:test-producer-group");
-        EnvironmentTestUtils.addEnvironment(this.context, "test-topic:test-topic-from-configure");
-        EnvironmentTestUtils.addEnvironment(this.context, "test-tag:test-tag-from-configure");
-        this.context.register(TestProducerWithTopicAndTag.class);
-        this.context.register(MQProducerAutoConfiguration.class);
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.producer-group:test-producer-group");
+        this.context.register(TestProducer.class);
+        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
         this.context.refresh();
     }
 
@@ -105,32 +94,15 @@ public class MQProducerAutoConfigurationTest {
         assertEquals(dp.getNamesrvAddr(), "127.0.0.1:9876");
     }
 
-    @Test
-    public void testProducerConfigurationWithTopicAndTag() throws Exception {
-        prepareApplicationContext();
-        TestProducerWithTopicAndTag producer = context.getBean(TestProducerWithTopicAndTag.class);
-        assertNotNull(producer);
-        assertEquals(producer.getTopic(), "test-topic");
-        assertEquals(producer.getTag(), "test-tag");
-    }
-
-    @Test
-    public void testProducerConfigurationWithTopicAndTagFromConfigure() throws Exception {
-        prepareApplicationContextWithTopicAngTag();
-        TestProducerWithTopicAndTag producer = context.getBean(TestProducerWithTopicAndTag.class);
-        assertNotNull(producer);
-        assertEquals(producer.getTopic(), "test-topic-from-configure");
-        assertEquals(producer.getTag(), "test-tag-from-configure");
-    }
 
 
     @Component
-    @MQProducer(topic = "test-topic", tag = "test-tag")
-    static class TestProducerWithTopicAndTag extends AbstractMQProducer {
+    @MQProducer
+    static class TestProducer extends AbstractMQProducer {
     }
 
     @Component
-    @MQProducer(topic = "test-topic", tag = "test-tag")
+    @MQProducer
     static class TestProducerNoParent{
     }
 

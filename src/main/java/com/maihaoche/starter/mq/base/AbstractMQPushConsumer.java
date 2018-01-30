@@ -18,7 +18,7 @@ import java.util.Map;
  * RocketMQ的消费者(Push模式)处理消息的接口
  */
 @Slf4j
-public abstract class AbstractMQPushConsumer<T> extends AbstractMQConsumer<T>{
+public abstract class AbstractMQPushConsumer<T> extends AbstractMQConsumer<T> {
 
     @Getter
     @Setter
@@ -45,7 +45,7 @@ public abstract class AbstractMQPushConsumer<T> extends AbstractMQConsumer<T>{
      */
     public ConsumeConcurrentlyStatus dealMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         for(MessageExt messageExt : list) {
-            log.info("receive msgId: {}, tags : {}" , messageExt.getMsgId(), messageExt.getTags());
+            log.debug("receive msgId: {}, tags : {}" , messageExt.getMsgId(), messageExt.getTags());
             // parse message body
             T t = parseMessage(messageExt);
             // parse ext properties

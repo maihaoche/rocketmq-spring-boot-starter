@@ -13,6 +13,4 @@ import java.lang.annotation.*;
 @Documented
 @Component
 public @interface MQProducer {
-    String topic() default "";
-    String tag() default "";
 }
