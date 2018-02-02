@@ -97,6 +97,7 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
             consumer.setMessageModel(MessageModel.valueOf(mqConsumer.messageMode()));
             consumer.subscribe(topic, StringUtils.join(mqConsumer.tag(), "||"));
             consumer.setInstanceName(UUID.randomUUID().toString());
+            consumer.setVipChannelEnabled(mqProperties.getVipChannelEnabled());
             AbstractMQPushConsumer abstractMQPushConsumer = (AbstractMQPushConsumer) bean;
             if (MessageExtConst.CONSUME_MODE_CONCURRENTLY.equals(mqConsumer.consumeMode())) {
                 consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) ->
