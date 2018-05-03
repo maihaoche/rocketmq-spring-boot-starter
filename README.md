@@ -117,10 +117,4 @@ demoProducer.syncSend(msg)
     
 ```
 
----
-
-拉了一个群，邀请了vongosling等RocketMQ的主要开发者，需要的请扫码加群：
-
-![](https://files.gitter.im/alibaba/RocketMQ/ea95/IMG_1466.jpg)
-
 
