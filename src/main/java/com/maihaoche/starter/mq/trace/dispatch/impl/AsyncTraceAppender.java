@@ -12,7 +12,7 @@ import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.namesrv.TopAddressing;
-import org.slf4j.Logger;
+import org.apache.rocketmq.logging.InternalLogger;
 
 import java.util.*;
 
@@ -21,7 +21,7 @@ import java.util.*;
  * Created by alvin on 16-3-7.
  */
 public class AsyncTraceAppender extends AsyncAppender {
-    private final static Logger clientlog = ClientLogger.getLog();
+    private final static InternalLogger clientlog = ClientLogger.getLog();
     /**
      * batch大小
      */
