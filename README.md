@@ -18,6 +18,7 @@
 * [x] 消息tag和key支持
 * [x] 自动序列化和反序列化消息体
 * [x] 消息的实际消费方IP追溯
+* [x] 发送事务消息(NEW)
 * [ ] ...
 * [x] ~~发送即忘消息~~（可能由于直接抛弃所有异常导致消息静默丢失，弃用）
 * [x] ~~拉取方式消费~~（配置方式复杂，位点可能发生偏移，弃用）
@@ -33,7 +34,7 @@
 <dependency>
     <groupId>com.maihaoche</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
-    <version>0.0.7</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -87,10 +88,10 @@ public class DemoProducer extends AbstractMQProducer{
 ##### 6. 创建消费方
 
 详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Consumer)：
-**支持配置项解析**，如存在`suclogger-test-cluster`配置项，会优先将topic解析为配置项对应的值。
+**支持springEL风格配置项解析**，如存在`suclogger-test-cluster`配置项，会优先将topic解析为配置项对应的值。
 
 ```java
-@MQConsumer(topic = "suclogger-test-cluster", consumerGroup = "local_sucloger_dev")
+@MQConsumer(topic = "${suclogger-test-cluster}", consumerGroup = "local_sucloger_dev")
 public class DemoConsumer extends AbstractMQPushConsumer {
 
     @Override
@@ -117,4 +118,33 @@ demoProducer.syncSend(msg)
     
 ```
 
+
+
+------
+
+### 发送事务消息###
+
+> Since 0.1.0
+
+
+
+##### 5.1 事务消息发送方#####
+
+```java
+@MQTransactionProducer(producerGroup = "${camaro.mq.transactionProducerGroup}")
+public class DemoTransactionProducer extends AbstractMQTransactionProducer {
+
+    @Override
+    public LocalTransactionState executeLocalTransaction(Message msg, Object arg) {
+        // executeLocalTransaction
+        return LocalTransactionState.UNKNOW;
+    }
+
+    @Override
+    public LocalTransactionState checkLocalTransaction(MessageExt msg) {
+        // LocalTransactionState.ROLLBACK_MESSAGE
+        return LocalTransactionState.COMMIT_MESSAGE;
+    }
+}
+```
 
