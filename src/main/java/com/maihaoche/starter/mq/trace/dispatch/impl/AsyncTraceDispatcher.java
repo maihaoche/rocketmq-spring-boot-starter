@@ -4,7 +4,7 @@ import com.maihaoche.starter.mq.trace.common.OnsTraceConstants;
 import com.maihaoche.starter.mq.trace.dispatch.AsyncAppender;
 import com.maihaoche.starter.mq.trace.dispatch.AsyncDispatcher;
 import org.apache.rocketmq.client.log.ClientLogger;
-import org.slf4j.Logger;
+import org.apache.rocketmq.logging.InternalLogger;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 异步提交消息轨迹等数据
  */
 public class AsyncTraceDispatcher extends AsyncDispatcher {
-    private final static Logger clientlog = ClientLogger.getLog();
+    private final static InternalLogger clientlog = ClientLogger.getLog();
     // RingBuffer 实现，size 必须为 2 的 n 次方
     private final Object[] entries;
     private final int queueSize;

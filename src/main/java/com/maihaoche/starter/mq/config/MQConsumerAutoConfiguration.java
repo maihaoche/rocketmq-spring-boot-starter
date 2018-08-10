@@ -4,7 +4,6 @@ import com.maihaoche.starter.mq.annotation.MQConsumer;
 import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
 import com.maihaoche.starter.mq.base.MessageExtConst;
 import com.maihaoche.starter.mq.trace.common.OnsTraceConstants;
-import com.maihaoche.starter.mq.trace.dispatch.AsyncAppender;
 import com.maihaoche.starter.mq.trace.dispatch.impl.AsyncTraceAppender;
 import com.maihaoche.starter.mq.trace.dispatch.impl.AsyncTraceDispatcher;
 import com.maihaoche.starter.mq.trace.tracehook.OnsConsumeMessageHookImpl;
@@ -18,14 +17,12 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by suclogger on 2017/6/28.
@@ -37,6 +34,8 @@ import java.util.UUID;
 public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
 
     private AsyncTraceDispatcher asyncTraceDispatcher;
+    // 维护一份map用于检测是否用同样的consumerGroup订阅了不同的topic+tag
+    private Map<String, String> validConsumerMap;
 
     @PostConstruct
     public void init() throws Exception {
@@ -44,9 +43,12 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
         if(!CollectionUtils.isEmpty(beans) && mqProperties.getTraceEnabled()) {
             initAsyncAppender();
         }
+        validConsumerMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
             publishConsumer(entry.getKey(), entry.getValue());
         }
+        // 清空map，等待回收
+        validConsumerMap = null;
     }
 
     private AsyncTraceDispatcher initAsyncAppender() {
@@ -80,14 +82,23 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
         if (!AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())) {
             throw new RuntimeException(bean.getClass().getName() + " - consumer未实现Consumer抽象类");
         }
+        Environment environment = applicationContext.getEnvironment();
 
-        String consumerGroup = applicationContext.getEnvironment().getProperty(mqConsumer.consumerGroup());
-        if (StringUtils.isEmpty(consumerGroup)) {
-            consumerGroup = mqConsumer.consumerGroup();
+        String consumerGroup = environment.resolvePlaceholders(mqConsumer.consumerGroup());
+        String topic = environment.resolvePlaceholders(mqConsumer.topic());
+        String tags = "*";
+        if(mqConsumer.tag().length == 1) {
+            tags = environment.resolvePlaceholders(mqConsumer.tag()[0]);
+        } else if(mqConsumer.tag().length > 1) {
+            tags = StringUtils.join(mqConsumer.tag(), "||");
         }
-        String topic = applicationContext.getEnvironment().getProperty(mqConsumer.topic());
-        if (StringUtils.isEmpty(topic)) {
-            topic = mqConsumer.topic();
+
+        // 检查consumerGroup
+        if(!StringUtils.isEmpty(validConsumerMap.get(consumerGroup))) {
+            String exist = validConsumerMap.get(consumerGroup);
+            throw new RuntimeException("消费组重复订阅，请新增消费组用于新的topic和tag组合: " + consumerGroup + "已经订阅了" + exist);
+        } else {
+            validConsumerMap.put(consumerGroup, topic + "-" + tags);
         }
 
         // 配置push consumer
@@ -95,7 +106,7 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
             DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
             consumer.setNamesrvAddr(mqProperties.getNameServerAddress());
             consumer.setMessageModel(MessageModel.valueOf(mqConsumer.messageMode()));
-            consumer.subscribe(topic, StringUtils.join(mqConsumer.tag(), "||"));
+            consumer.subscribe(topic, tags);
             consumer.setInstanceName(UUID.randomUUID().toString());
             consumer.setVipChannelEnabled(mqProperties.getVipChannelEnabled());
             AbstractMQPushConsumer abstractMQPushConsumer = (AbstractMQPushConsumer) bean;
