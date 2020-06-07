@@ -5,7 +5,7 @@ import com.maihaoche.starter.mq.base.AbstractMQPushConsumer;
 import com.maihaoche.starter.mq.base.MessageExtConst;
 import org.junit.After;
 import org.junit.Test;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContext() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876").applyTo(this.context.getEnvironment());
         this.context.register(TestConsumer.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -28,7 +28,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContextCMOrderly() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876").applyTo(this.context.getEnvironment());
         this.context.register(TestConsumerOrderly.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -36,7 +36,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContextCMError() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876").applyTo(this.context.getEnvironment());
         this.context.register(TestConsumerErrorCM.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -51,7 +51,7 @@ public class MQConsumerAutoConfigurationTest {
 
     private void prepareApplicationContextMissingParent() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876").applyTo(this.context.getEnvironment());
         this.context.register(TestConsumerMissingParent.class);
         this.context.register(MQConsumerAutoConfiguration.class);
         this.context.refresh();
@@ -124,7 +124,7 @@ public class MQConsumerAutoConfigurationTest {
 
     @Component
     @MQConsumer(consumerGroup = "test_consumer_group", topic = "test_topic")
-    static class TestConsumerMissingParent{
+    static class TestConsumerMissingParent {
     }
 
 }

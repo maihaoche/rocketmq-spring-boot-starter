@@ -5,13 +5,11 @@ import com.maihaoche.starter.mq.base.AbstractMQProducer;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.junit.After;
 import org.junit.Test;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class MQProducerAutoConfigurationTest {
 
@@ -33,7 +31,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextMissingProducerGroupConfigure() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876").applyTo(this.context.getEnvironment());
         this.context.register(TestProducer.class);
         MQProducerAutoConfiguration.setProducer(null);
         this.context.register(MQProducerAutoConfiguration.class);
@@ -42,8 +40,9 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextWithoutParent() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
-        EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.producer-group:test-producer-group");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876")
+                .and("rocketmq.producer-group=test-producer-group")
+                .applyTo(this.context.getEnvironment());
         this.context.register(TestProducerNoParent.class);
         this.context.register(MQProducerAutoConfiguration.class);
         this.context.refresh();
@@ -51,8 +50,8 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContext() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.producer-group:test-producer-group");
+        TestPropertyValues.of("spring.rocketmq.name-server-address=127.0.0.1:9876", "spring.rocketmq.producer-group=test-producer-group")
+                .applyTo(this.context.getEnvironment());
         this.context.register(TestProducer.class);
         this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
         this.context.refresh();
@@ -67,7 +66,7 @@ public class MQProducerAutoConfigurationTest {
     @Test
     public void testEmpty() {
         prepareApplicationContextEmpty();
-        assertNull(context.getBean(DefaultMQProducer.class));
+        assertTrue(context.getBeansOfType(DefaultMQProducer.class).isEmpty());
     }
 
     @Test(expected = RuntimeException.class)
@@ -88,12 +87,11 @@ public class MQProducerAutoConfigurationTest {
     @Test
     public void testProducerConfiguration() throws Exception {
         prepareApplicationContext();
-        DefaultMQProducer dp = context.getBean(DefaultMQProducer.class);
+        TestProducer dp = context.getBean(TestProducer.class);
         assertNotNull(dp);
-        assertEquals(dp.getProducerGroup(), "test-producer-group");
-        assertEquals(dp.getNamesrvAddr(), "127.0.0.1:9876");
+        assertEquals(dp.getProducer().getProducerGroup(), "test-producer-group");
+        assertEquals(dp.getProducer().getNamesrvAddr(), "127.0.0.1:9876");
     }
-
 
 
     @Component
@@ -103,9 +101,8 @@ public class MQProducerAutoConfigurationTest {
 
     @Component
     @MQProducer
-    static class TestProducerNoParent{
+    static class TestProducerNoParent {
     }
-
 
 
 }

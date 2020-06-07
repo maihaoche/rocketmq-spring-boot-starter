@@ -2,11 +2,15 @@ package com.maihaoche.starter.mq.config;
 
 import com.maihaoche.starter.mq.annotation.MQProducer;
 import com.maihaoche.starter.mq.annotation.MQTransactionProducer;
+import com.maihaoche.starter.mq.base.AbstractMQProducer;
 import com.maihaoche.starter.mq.base.AbstractMQTransactionProducer;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +18,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -22,51 +25,60 @@ import java.util.concurrent.*;
  * Created by yipin on 2017/6/29.
  * 自动装配消息生产者
  */
-@Slf4j
 @Configuration
 @ConditionalOnBean(MQBaseAutoConfiguration.class)
-public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
+public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration implements InitializingBean {
 
-    @Setter
+    private final static Logger LOGGER = LoggerFactory.getLogger(MQProducerAutoConfiguration.class);
+
     private static DefaultMQProducer producer;
 
-    @Bean
-    public DefaultMQProducer exposeProducer() throws Exception {
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.configCommonProducer();
+        this.configTransactionProducer();
+    }
+
+    private void configCommonProducer() {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(MQProducer.class);
         //对于仅仅只存在消息消费者的项目，无需构建生产者
-        if(CollectionUtils.isEmpty(beans)){
-            return null;
+        if (CollectionUtils.isEmpty(beans)) {
+            return;
         }
-        if(producer == null) {
+        if (producer == null) {
             Assert.notNull(mqProperties.getProducerGroup(), "producer group must be defined");
             Assert.notNull(mqProperties.getNameServerAddress(), "name server address must be defined");
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
             producer.setNamesrvAddr(mqProperties.getNameServerAddress());
             producer.setSendMsgTimeout(mqProperties.getSendMsgTimeout());
             producer.setSendMessageWithVIPChannel(mqProperties.getVipChannelEnabled());
-            producer.start();
+            try {
+                producer.start();
+            } catch (MQClientException e) {
+                LOGGER.error("build producer error : {}", e.getLocalizedMessage());
+                throw new RuntimeException(e);            }
         }
-        return producer;
+
+        beans.forEach((key, value) -> {
+            AbstractMQProducer beanObj = (AbstractMQProducer) value;
+            beanObj.setProducer(producer);
+        });
     }
 
-    @PostConstruct
-    public void configTransactionProducer() {
+    private void configTransactionProducer() {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(MQTransactionProducer.class);
-        if(CollectionUtils.isEmpty(beans)){
+        if (CollectionUtils.isEmpty(beans)) {
             return;
         }
-        ExecutorService executorService = new ThreadPoolExecutor(beans.size(), beans.size()*2, 100, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2000), new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r);
-                thread.setName("client-transaction-msg-check-thread");
-                return thread;
-            }
+        ExecutorService executorService = new ThreadPoolExecutor(beans.size(), beans.size() * 2, 100, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2000), r -> {
+            Thread thread = new Thread(r);
+            thread.setName("client-transaction-msg-check-thread");
+            return thread;
         });
         Environment environment = applicationContext.getEnvironment();
-        beans.entrySet().forEach( transactionProducer -> {
+        beans.forEach((key, value) -> {
             try {
-                AbstractMQTransactionProducer beanObj = AbstractMQTransactionProducer.class.cast(transactionProducer.getValue());
+                AbstractMQTransactionProducer beanObj = (AbstractMQTransactionProducer) value;
                 MQTransactionProducer anno = beanObj.getClass().getAnnotation(MQTransactionProducer.class);
 
                 TransactionMQProducer producer = new TransactionMQProducer(environment.resolvePlaceholders(anno.producerGroup()));
@@ -76,8 +88,13 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
                 producer.start();
                 beanObj.setProducer(producer);
             } catch (Exception e) {
-                log.error("build transaction producer error : {}", e);
+                LOGGER.error("build transaction producer error : {}", e.getLocalizedMessage());
+                throw new RuntimeException(e);
             }
         });
+    }
+
+    public static void setProducer(DefaultMQProducer producer) {
+        MQProducerAutoConfiguration.producer = producer;
     }
 }

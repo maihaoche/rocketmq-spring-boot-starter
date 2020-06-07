@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter({AbstractMQProducer.class, AbstractMQPushConsumer.class})
 @EnableConfigurationProperties(MQProperties.class)
 public class MQBaseAutoConfiguration implements ApplicationContextAware {
+
     protected MQProperties mqProperties;
 
     @Autowired
