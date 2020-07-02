@@ -1,8 +1,8 @@
 package com.maihaoche.starter.mq.config;
 
-import com.maihaoche.starter.mq.annotation.MQProducer;
 import com.maihaoche.starter.mq.annotation.MQTransactionProducer;
 import com.maihaoche.starter.mq.base.AbstractMQTransactionProducer;
+import com.maihaoche.starter.mq.base.RocketMQTemplate;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
@@ -16,7 +16,11 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by yipin on 2017/6/29.
@@ -32,12 +36,10 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
 
     @Bean
     public DefaultMQProducer exposeProducer() throws Exception {
-        Map<String, Object> beans = applicationContext.getBeansWithAnnotation(MQProducer.class);
-        //对于仅仅只存在消息消费者的项目，无需构建生产者
-        if(CollectionUtils.isEmpty(beans)){
+        if (!mqProperties.getExistProducer()) {
             return null;
         }
-        if(producer == null) {
+        if (producer == null) {
             Assert.notNull(mqProperties.getProducerGroup(), "producer group must be defined");
             Assert.notNull(mqProperties.getNameServerAddress(), "name server address must be defined");
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
@@ -49,13 +51,18 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
         return producer;
     }
 
+    @Bean
+    public RocketMQTemplate exposeTemplate() {
+        return new RocketMQTemplate();
+    }
+
     @PostConstruct
     public void configTransactionProducer() {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(MQTransactionProducer.class);
-        if(CollectionUtils.isEmpty(beans)){
+        if (CollectionUtils.isEmpty(beans)) {
             return;
         }
-        ExecutorService executorService = new ThreadPoolExecutor(beans.size(), beans.size()*2, 100, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2000), new ThreadFactory() {
+        ExecutorService executorService = new ThreadPoolExecutor(beans.size(), beans.size() * 2, 100, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2000), new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 Thread thread = new Thread(r);
@@ -64,7 +71,7 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
             }
         });
         Environment environment = applicationContext.getEnvironment();
-        beans.entrySet().forEach( transactionProducer -> {
+        beans.entrySet().forEach(transactionProducer -> {
             try {
                 AbstractMQTransactionProducer beanObj = AbstractMQTransactionProducer.class.cast(transactionProducer.getValue());
                 MQTransactionProducer anno = beanObj.getClass().getAnnotation(MQTransactionProducer.class);

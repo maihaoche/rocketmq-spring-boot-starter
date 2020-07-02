@@ -33,7 +33,7 @@
 
     <groupId>com.maihaoche</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.2-SNAPSHOT</version>
 
     <scm>
         <url>https://github.com/maihaoche/rocketmq-spring-boot-starter</url>

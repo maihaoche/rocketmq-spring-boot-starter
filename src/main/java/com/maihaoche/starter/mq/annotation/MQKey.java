@@ -11,9 +11,10 @@ import java.lang.annotation.*;
  * @author suclogger
  *
  */
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface MQKey {
     String prefix() default "";
+    String field();
 }
