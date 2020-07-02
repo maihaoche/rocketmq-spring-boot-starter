@@ -34,8 +34,7 @@ public abstract class AbstractMQConsumer<T> {
         final Type type = this.getMessageType();
         if (type instanceof Class) {
             try {
-                T data = gson.fromJson(new String(message.getBody()), type);
-                return data;
+                return gson.fromJson(new String(message.getBody()), type);
             } catch (JsonSyntaxException e) {
                 log.error("parse message json fail : {}", e.getMessage());
             }

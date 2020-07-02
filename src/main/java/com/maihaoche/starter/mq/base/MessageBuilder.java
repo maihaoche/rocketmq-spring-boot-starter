@@ -60,27 +60,43 @@ public class MessageBuilder {
     }
 
     public Message build() {
-        StringBuilder messageKey= new StringBuilder(StringUtils.isEmpty(key) ? "" : key);
+        StringBuilder messageKey = new StringBuilder(StringUtils.isEmpty(key) ? "" : key);
         try {
-            Field[] fields = message.getClass().getDeclaredFields();
-            for (Field field : fields) {
-                Annotation[] allFAnnos= field.getAnnotations();
-                if(allFAnnos.length > 0) {
-                    for (int i = 0; i < allFAnnos.length; i++) {
-                        if(allFAnnos[i].annotationType().equals(MQKey.class)) {
+            Annotation[] annotations = message.getClass().getAnnotations();
+//            for (Field field : fields) {
+//                Annotation[] allFAnnos= field.getAnnotations();
+//                if(allFAnnos.length > 0) {
+//                    for (int i = 0; i < allFAnnos.length; i++) {
+//                        if(allFAnnos[i].annotationType().equals(MQKey.class)) {
+//                            field.setAccessible(true);
+//                            MQKey mqKey = MQKey.class.cast(allFAnnos[i]);
+//                            messageKey.append(StringUtils.SPACE).append(StringUtils.isEmpty(mqKey.prefix()) ? field.get(message).toString() : (mqKey.prefix() + ":" + field.get(message).toString()));
+//                        }
+//                    }
+//                }
+//            }
+            if (annotations.length > 0) {
+                for (Annotation annotation : annotations) {
+                    if (annotation.annotationType().equals(MQKey.class)) {
+                        MQKey mqKey = (MQKey) annotation;
+                        Field[] fields = message.getClass().getDeclaredFields();
+                        for (Field field : fields) {
                             field.setAccessible(true);
-                            MQKey mqKey = MQKey.class.cast(allFAnnos[i]);
-                            messageKey.append(StringUtils.SPACE).append(StringUtils.isEmpty(mqKey.prefix()) ? field.get(message).toString() : (mqKey.prefix() + ":" + field.get(message).toString()));
+                            if (field.getName().equals(mqKey.field())) {
+                                messageKey.append(StringUtils.isEmpty(mqKey.prefix()) ? field.get(message).toString() : (mqKey.prefix() + ":" + field.get(message).toString()));
+                                break;
+                            }
                         }
+                        break;
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("parse key error : {}" , e.getMessage());
+            log.error("parse key error : {}", e.getMessage());
         }
         String str = gson.toJson(message);
-        if(StringUtils.isEmpty(topic)) {
-            if(StringUtils.isEmpty(getTopic())) {
+        if (StringUtils.isEmpty(topic)) {
+            if (StringUtils.isEmpty(getTopic())) {
                 throw new RuntimeException("no topic defined to send this message");
             }
         }
@@ -88,15 +104,14 @@ public class MessageBuilder {
         if (!StringUtils.isEmpty(tag)) {
             message.setTags(tag);
         }
-        if(StringUtils.isNotEmpty(messageKey.toString())) {
+        if (StringUtils.isNotEmpty(messageKey.toString())) {
             message.setKeys(messageKey.toString());
         }
-        if(delayTimeLevel != null && delayTimeLevel > 0 && delayTimeLevel <= DELAY_ARRAY.length) {
+        if (delayTimeLevel != null && delayTimeLevel > 0 && delayTimeLevel <= DELAY_ARRAY.length) {
             message.setDelayTimeLevel(delayTimeLevel);
         }
         return message;
     }
-
 
 
 }

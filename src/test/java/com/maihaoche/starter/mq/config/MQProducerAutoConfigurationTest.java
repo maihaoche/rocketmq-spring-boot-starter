@@ -19,6 +19,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextEmpty() {
         this.context = new AnnotationConfigApplicationContext();
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.exist-producer:false");
         this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
         this.context.refresh();
     }
@@ -60,7 +61,9 @@ public class MQProducerAutoConfigurationTest {
 
     @After
     public void close() {
-        this.context.close();
+        if (context != null) {
+            this.context.close();
+        }
     }
 
 

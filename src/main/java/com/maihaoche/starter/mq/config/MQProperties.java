@@ -32,4 +32,9 @@ public class MQProperties {
      */
     private Boolean vipChannelEnabled = Boolean.TRUE;
 
+    /**
+     * 默认存在生产者
+     */
+    private Boolean existProducer = Boolean.TRUE;
+
 }
